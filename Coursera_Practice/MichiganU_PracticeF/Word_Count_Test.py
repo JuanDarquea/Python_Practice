@@ -1,3 +1,5 @@
+# !/usr/bin/env python3
+# encoding: utf-8
 # Word_Count_Test
 import os
 from dotenv import load_dotenv # to load environment variables from .env file
