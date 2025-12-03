@@ -3,24 +3,24 @@
 # Word_Count_Test
 import os
 from dotenv import load_dotenv # to load environment variables from .env file
+
 load_dotenv()
 
-filePath = os.getenv("docx_translator_dir"), "\\TestDocument.docx"
+filedir = os.getenv("coursera_mich_dir", ".")
+filename = "words.txt"
 
 # Get the name of the file and open it
 #name = input('Enter the words: ')
-name = filePath
-handle = open(name, 'r', encoding='utf-8')
-all_words = dict()
-all_words = handle.read().text()
-handle.close()
+name = os.path.join(filedir, filename)
+handle = open(name)
 
 # Count word frecuency
 count = dict()
-for line in all_words:
+for line in handle:
     words = line.split(sep=None, maxsplit=-1)
     for word in words:
         count[word] = count.get(word, 0) + 1
+print(count)
 
 # Find the most common word
 bigcount = None
@@ -31,4 +31,4 @@ for word, count in count.items():
         bigcount = count
 
 # Print result
-print(bigword, bigcount)
+print("Word:", bigword, "Count:", bigcount)
