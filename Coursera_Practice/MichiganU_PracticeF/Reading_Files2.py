@@ -18,6 +18,7 @@ filepath = os.path.join(filedir, "mbox-short.txt")
 if not os.path.exists(filepath):
     with open(filepath, 'w', encoding='utf-8') as file:
         file.write(data)
+    print(f"The file {filepath} has been created.")
 else:
         print(f"The file {filepath} already exists.")
 
@@ -25,18 +26,18 @@ else:
 # Use the file name mbox-short.txt as the file name
 #fname = input("Enter file name: ")
 fname = "mbox-short.txt"
-fh = open(fname)
 i = 0
 s = 0
-for line in fh:
-    if not line.startswith("X-DSPAM-Confidence:"):
-        continue
-    else:
-        cont = line.find(":")
-        ncont = line[cont+2:]
-        fcont = float(ncont)
-        s = s + fcont
-    i = i + 1   
-    
+with open(fname) as fh:
+    for line in fh:
+        if not line.startswith("X-DSPAM-Confidence:"):
+            continue
+        else:
+            cont = line.find(":")
+            ncont = line[cont+2:]
+            fcont = float(ncont)
+            s = s + fcont
+        i = i + 1   
+        
 avg = s / i
 print("Average spam confidence:", avg)
