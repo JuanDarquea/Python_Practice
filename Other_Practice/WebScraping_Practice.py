@@ -3,8 +3,10 @@ from bs4 import BeautifulSoup
 import urllib
 import requests
 import wikipediaapi
+import re
+import csv
 
-url1 = 'https://scrapepark.org/spanish/'
+url1 = 'https://scrapepark.org/'
 
 
 def sunset_sunrise_API():
@@ -101,7 +103,7 @@ def call_soup():
     html = req.text
     soup = BeautifulSoup(html, 'html.parser')
 
-    return req, soup
+    return req, html, soup
 
 def BeautifulSoup_WebScraping(req, soup):
     """
@@ -193,15 +195,16 @@ def name_price_scrape(soup):
     try:
         # for loop to iterate the data from variable 'divs' and search all the ones with attribute 'h5' as product and 'h6' as price 
         for div in divs:
-            if (div.h6 is not None) and ('Patineta' in div.h5.text): # if h6 exists and h5 contains the word 'Patineta'
+            if (div.h6 is not None) and ('Skateboard' in div.h5.text): # if h6 exists and h5 contains the word 'Patineta'
                 product = div.h5.get_text(strip=True)
                 price = div.h6.get_text(strip=True).replace('$', '')
                 # can add filters
-                print(f'Product: {product:<16} | price ($): {price}') # print the product (formatting to 16 characters) with it's price
+                print(f'Product: {product:<17} | price ($): {price}') # print the product (formatting to 16 characters) with it's price
                 products.append(product)
                 prices.append(price)
     except Exception as e:
         print(f'Error: {e}')
+    return products, prices
 
 def mult_page_scrape():
     """
@@ -216,12 +219,64 @@ def mult_page_scrape():
 
         print(parse.h5.text)
 
+def regular_expresions(soup):
+    """
+    Docstring for regular_expresions
+    
+    :param soup: Description
+    """
+    telf = soup.find_all(string=re.compile('\\d+-\\d+-\\d+'))
+    print('Phone number:', telf[0])
+
+    copyright = soup.find(string=re.compile('©'))
+    first_copyright = copyright.parent.find_next_siblings()
+    print(f'\nThis is the copyright:', copyright)
+    print('Copyright sibling tag:', first_copyright)
+
+    menu = soup.find(string=re.compile('MENU'))
+    print(f'\n"Menu" tag:', menu)
+    print('"Menu" parent tag:', menu.parent)
+    print('"Menu" next sibling tag:', 
+          f'\n{menu.parent.find_next_siblings()}'
+          )
+    
+    print(f'\nAbout exceptions:')
+    strings_to_find = ['MENU', 'Carpincho', '©', 'Skateboard']
+
+    for string in strings_to_find:
+        try:
+            word = soup.find(string=re.compile(string))
+            print(word.text)
+        except AttributeError:
+            print(f'The string "{string}" was not found.')
+
+def data_management(soup, products, prices):
+    """
+    Docstring for data_management
+    
+    :param soup: Description
+    """
+    products.insert(0, 'Products')
+    prices.insert(0, 'Prices')
+    data = dict(zip(products, prices))
+    
+    try:
+        with open('data.csv', 'w') as f:
+            w = csv.writer(f)
+            w.writerows(data.items())
+        print('File created successfuly!')
+    except Exception as e:
+        print('File could not be created.', f'\nError: {e}')
+
+
 def main():
     """
     Call function to use or practice as needed.
     """
-    req, soup = call_soup()
-    mult_page_scrape()
+    req, html, soup = call_soup()
+    products, prices = name_price_scrape(soup)
+    
+    data_management(soup, products, prices)
 
 if __name__=="__main__":
     main()
