@@ -93,13 +93,13 @@ def wikipedia_API():
     print(f'Summary: ', f'\n{wiki_python.summary}')
     print(f'\nURL:', wiki_python.fullurl)
 
-def call_soup():
+def call_soup(url):
     """
     
     """
     print(f'BeautifulSoup version:', bs4.__version__)
     
-    req = requests.get(url1)
+    req = requests.get(url)
     html = req.text
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -268,16 +268,115 @@ def data_management(soup, products, prices):
     except Exception as e:
         print('File could not be created.', f'\nError: {e}')
 
+def webS_exercises(soup):
+    """
+    Docstring for webS_exercises
+    
+    :param soup: Description
+    """
+    # objects that most exercises will need
+    detail_box = soup.find_all('div', class_='detail-box')
+    prices = []
+    products = []
+
+    # first exercise: 
+    # find Skatebiards that sell for $68 or less
+    print()
+    print('-'*5, 'First exercise')
+    print('Skateboards with cost of $68 or more:')
+    
+    try:
+        for div in detail_box:
+            if (div.h6 is not None) and ('Skateboard' in div.h5.text):
+                product = div.h5.get_text(strip=True)
+                price = int(div.h6.get_text(strip=True).replace('$', ''))
+                if price >= 68:
+                    print(f'{product} - ${price}')   
+    except Exception as e:
+        print('Error:', e)
+        
+    print('-'*10, 'End', '-'*10)
+
+    # second exercise:
+    # find skateboards that have 3< in it's name
+    print()
+    print('-'*5, 'Second exercise')
+    print('Skateboards that contanin #3 or more in name:')
+    try:
+        for div in detail_box:
+            if (div.h6 is not None) and ('Skateboard' in div.h5.text):
+                product = div.h5.get_text(strip=True)
+                split = product.split()
+                skt = split[1][10:12]
+                if int(skt) >= 3:
+                    print(product)
+    except NameError:
+        print('Could not fint file')
+    except TypeError:
+        print('Object type not iterable.')
+    except AttributeError:
+        print('Object has no attribute ".text".')
+
+    print('-'*10, 'End', '-'*10)
+
+    # third exercise:
+    # find any text that has the words discount or offer
+    print()
+    print('-'*5, 'Third exercise')
+    print('Find any text that has the words discount or offer:')
+    lst = ['discount', 'sale', 'Skateboard']
+    for w in lst:
+        try:
+            word = soup.find_all(string=re.compile(w))
+            print(word) # prints the dict objects with the list of strings found with the requested words
+            #for n in word: # to print only the strings found and not the dict objects
+            #    print(n)
+        except AttributeError:
+            print(f'No object found with word {word}')
+
+    print('-'*10, 'End', '-'*10)
+
+    # fourth exercise:
+    # create a csv file with two rows - client name & testimony
+    print()
+    print('-'*5, 'Fourth exercise')
+    print('Create a csv file with two rows - client name & testimony:')
+    clients = []
+    testimonys = []
+    for div in detail_box:
+            try:
+                if (div.find('p', class_='customer-comment')) and ('Customer' in div.h5.text):
+                    client = div.h5.get_text(strip=True)
+                    testimony = div.p.get_text(strip=True)
+                    clients.append(client)
+                    testimonys.append(testimony)
+            except Exception as e:
+                print('Error:', e)
+    
+    clients.insert(0, "Clients")
+    testimonys.insert(0, 'Testimony')
+    data = dict(zip(clients, testimonys))
+    
+    try:
+        with open('Files/Exercise4.csv', 'w') as f:
+            w = csv.writer(f)
+            w.writerows(data.items())
+        print('File created successfuly!')
+    except Exception as e:
+        print('File could not be created.', f'\nError: {e}')
+    
+    print('-'*10, 'End', '-'*10)
 
 def main():
     """
     Call function to use or practice as needed.
     """
-    req, html, soup = call_soup()
-    products, prices = name_price_scrape(soup)
+    req, html, soup = call_soup(url1)
+    #products, prices = name_price_scrape(soup)
     
-    data_management(soup, products, prices)
+    webS_exercises(soup)
 
 if __name__=="__main__":
     main()
 
+ 
